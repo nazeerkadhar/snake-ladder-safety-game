@@ -267,3 +267,61 @@ footer {
   color: var(--accent);
   border-color: var(--accent);
 }
+/* 🔹 CONTROLS & DICE */
+#controls {
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  border: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dice-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.dice-animate { font-size: 4rem; transition: transform 0.2s; }
+.dice-animate.rolling { animation: diceShake 0.08s infinite; filter: blur(1px); }
+@keyframes diceShake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(12deg) scale(1.05); }
+  50% { transform: rotate(-12deg) scale(1); }
+  75% { transform: rotate(8deg) scale(1.05); }
+}
+
+.dice-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); min-height: 24px; }
+
+.status-bar {
+  background: var(--bg-dark);
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.roll-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(230,126,34,0.3);
+}
+.roll-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(230,126,34,0.4); }
+.roll-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background: #555; }
+
+#message { color: var(--text-secondary); min-height: 20px; font-size: 0.95rem; margin: 0; }
+
+/* 🔹 CELL TEXT STYLING */
+.cell-num { font-weight: bold; font-size: 0.8rem; }
+.cell-icon { font-size: 1rem; margin-top: 2px; }
+.cell-msg { font-size: 0.55rem; color: #bdc3c7; margin-top: 2px; line-height: 1.1; padding: 0 2px; }
