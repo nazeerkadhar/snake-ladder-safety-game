@@ -29,10 +29,10 @@ function init() {
   updateStatus();
   msgEl.textContent = "🎲 Click ROLL DICE to start!";
   
-  // Reset button listener
-  rollBtn.replaceWith(rollBtn.cloneNode(true));
-  const newRollBtn = document.getElementById('roll-btn');
-  newRollBtn.addEventListener('click', playerTurn);
+  // Remove old listeners to prevent duplicates
+  const newBtn = rollBtn.cloneNode(true);
+  rollBtn.parentNode.replaceChild(newBtn, rollBtn);
+  newBtn.addEventListener('click', playerTurn);
 }
 
 function createBoard() {
@@ -40,21 +40,13 @@ function createBoard() {
   for (let row = 0; row < 10; row++) {
     let base = (9 - row) * 10;
     for (let i = 0; i < 10; i++) {
-      let num;
-      if (row % 2 === 0) num = base + (10 - i); 
-      else num = base + (1 + i);                
-      
+      let num = (row % 2 === 0) ? base + (10 - i) : base + (1 + i);
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.id = `cell-${num}`;
-      
-      let content = `<div class="cell-num">${num}</div>`;
-      if (snakes[num]) content += '<div class="cell-icon">🐍</div>';
-      else if (ladders[num]) content += '<div class="cell-icon">🪜</div>';
-      else content += '<div style="height:20px"></div>'; 
-      
-      if (safetyMsgs[num]) content += `<div class="cell-msg">${safetyMsgs[num]}</div>`;
-      cell.innerHTML = content;
+      cell.innerHTML = `<div class="cell-num">${num}</div>` +
+        (snakes[num] ? '<div class="cell-icon">🐍</div>' : ladders[num] ? '<div class="cell-icon">🪜</div>' : '<div style="height:20px"></div>') +
+        (safetyMsgs[num] ? `<div class="cell-msg">${safetyMsgs[num]}</div>` : '');
       grid.appendChild(cell);
     }
   }
@@ -63,20 +55,12 @@ function createBoard() {
 function renderTokens() {
   document.querySelectorAll('.cell').forEach(c => {
     c.style.border = '1px solid #34495e';
-    c.style.background = c.id % 2 !== 0 ? '#2c3e50' : '#3d566e';
+    c.style.background = parseInt(c.id.split('-')[1]) % 2 !== 0 ? '#2c3e50' : '#3d566e';
   });
-  
   const pCell = document.getElementById(`cell-${pPos}`);
-  if (pCell) {
-    pCell.style.border = '2px solid #27ae60';
-    pCell.style.background = '#1e3a2f';
-  }
-  
+  if (pCell) { pCell.style.border = '2px solid #27ae60'; pCell.style.background = '#1e3a2f'; }
   const aCell = document.getElementById(`cell-${aiPos}`);
-  if (aCell) {
-    aCell.style.border = '2px solid #e74c3c';
-    aCell.style.background = '#3a1e1e';
-  }
+  if (aCell) { aCell.style.border = '2px solid #e74c3c'; aCell.style.background = '#3a1e1e'; }
 }
 
 function updateStatus() {
@@ -96,19 +80,16 @@ function updateStatus() {
 
 function playerTurn() {
   if (!gameActive || !isPlayerTurn) return;
-  
   rollBtn.disabled = true;
   msgEl.textContent = "Rolling...";
   
   animateDice((roll) => {
-    const result = movePiece(pPos, roll, true);
-    pPos = result.newPos;
+    const res = movePiece(pPos, roll, true);
+    pPos = res.newPos;
     renderTokens();
-    
-    if (result.won) {
-      endGame(true);
-    } else {
-      if (result.msg) msgEl.textContent = result.msg;
+    if (res.won) endGame(true);
+    else {
+      if (res.msg) msgEl.textContent = res.msg;
       isPlayerTurn = false;
       updateStatus();
       setTimeout(aiTurn, 1500);
@@ -118,18 +99,15 @@ function playerTurn() {
 
 function aiTurn() {
   if (!gameActive || isPlayerTurn) return;
-  
   msgEl.textContent = "🤖 AI is rolling...";
   
   animateDice((roll) => {
-    const result = movePiece(aiPos, roll, false);
-    aiPos = result.newPos;
+    const res = movePiece(aiPos, roll, false);
+    aiPos = res.newPos;
     renderTokens();
-    
-    if (result.won) {
-      endGame(false);
-    } else {
-      if (result.msg) msgEl.textContent = result.msg;
+    if (res.won) endGame(false);
+    else {
+      if (res.msg) msgEl.textContent = res.msg;
       isPlayerTurn = true;
       updateStatus();
       msgEl.textContent = "Your turn! Click Roll.";
@@ -139,84 +117,56 @@ function aiTurn() {
 
 function movePiece(currentPos, roll, isPlayer) {
   let next = currentPos + roll;
-  if (next > 100) next = currentPos; 
-  
+  if (next > 100) next = currentPos;
   let msg = "";
   let won = (next === 100);
   
-  if (snakes[next]) {
-    msg = `🐍 Snake bite! Slid to ${snakes[next]}. ${safetyMsgs[snakes[next]] || ''}`;
-    next = snakes[next];
-  } 
-  else if (ladders[next]) {
-    msg = `🪜 Ladder climb! Up to ${ladders[next]}. ${safetyMsgs[ladders[next]] || ''}`;
-    next = ladders[next];
-  } 
-  else if (safetyMsgs[next]) {
-    msg = safetyMsgs[next];
-  }
+  if (snakes[next]) { msg = `🐍 Snake! Slid to ${snakes[next]}.`; next = snakes[next]; }
+  else if (ladders[next]) { msg = `🪜 Ladder! Up to ${ladders[next]}.`; next = ladders[next]; }
   
   return { newPos: next, won: won, msg: msg };
 }
 
+// --- ANIMATION LOGIC (FIXED) ---
 function animateDice(callback) {
-  // 1. Start Animation
-  diceEl.classList.add('rolling'); 
-  diceValueEl.textContent = "Rolling...";
+  // 1. FORCE STOP ANY STUCK ANIMATION
+  diceEl.style.animation = 'none';
+  diceEl.classList.remove('rolling');
   
-  // 2. Cycle Faces
-  const faces = ['⚀', '⚁', '⚂', '', '', '⚅']; // FIXED: All faces present
+  // 2. ALL 6 FACES (Fixed missing faces that caused blinking)
+  const faces = ['⚀', '⚁', '', '⚃', '⚄', '⚅'];
   let count = 0;
   
-  const flash = () => {
-    // Change face randomly
+  // 3. USE INTERVAL FOR RELIABLE STOPPING
+  const interval = setInterval(() => {
     diceEl.textContent = faces[Math.floor(Math.random() * 6)];
     count++;
     
-    if (count >= 15) {
-      // 3. STOP ANIMATION FORCIBLY
-      diceEl.classList.remove('rolling');
-      diceEl.style.animation = 'none'; // Emergency stop
-      
-      // 4. Final Roll Result
+    if (count >= 12) {
+      clearInterval(interval); // FORCE STOP
       const finalRoll = Math.floor(Math.random() * 6) + 1;
       diceEl.textContent = faces[finalRoll - 1];
-      diceValueEl.textContent = `Rolled: ${finalRoll}`;
-      
-      // Reset inline style after a moment so animation can work again next time
-      setTimeout(() => { diceEl.style.animation = ''; }, 100);
-      
+      diceValueEl.textContent = "Rolled: " + finalRoll;
       callback(finalRoll);
-      return;
     }
-    
-    // Loop
-    setTimeout(flash, 80); 
-  };
-  
-  flash();
+  }, 80);
 }
 
 function endGame(playerWon) {
   gameActive = false;
   updateStatus();
-  msgEl.textContent = playerWon 
-    ? "🎉 YOU WIN! Safety First!" 
-    : "🤖 AI Wins! Try again?";
+  msgEl.textContent = playerWon ? "🎉 YOU WIN! Safety First!" : "🤖 AI Wins! Try again?";
   msgEl.style.color = playerWon ? "#27ae60" : "#e74c3c";
 }
 
 function resetGame() {
-  pPos = 1;
-  aiPos = 1;
-  isPlayerTurn = true;
-  gameActive = true;
+  pPos = 1; aiPos = 1; isPlayerTurn = true; gameActive = true;
   diceEl.textContent = "🎲";
   diceValueEl.textContent = "Ready";
   msgEl.textContent = "New Game! Roll to start.";
   msgEl.style.color = "var(--accent)";
-  rollBtn.onclick = null; 
-  init(); // Re-init to attach listener
+  rollBtn.onclick = null;
+  init();
 }
 
 // Run on load
