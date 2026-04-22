@@ -3,34 +3,16 @@ const diceEl = document.getElementById('dice');
 const diceValueEl = document.getElementById('dice-value');
 const statusEl = document.getElementById('status');
 const msgEl = document.getElementById('message');
-const rollBtn = document.getElementById('roll-manual');
+const rollBtn = document.getElementById('roll-btn');
 
 let pPos = 1;
 let aiPos = 1;
 let isPlayerTurn = true;
 let gameActive = true;
-let autoRollInterval;
 
-const snakes = {
-  99: 1, 97: 79, 95: 75, 93: 73, 91: 69, 
-  87: 24, 84: 63, 82: 61, 77: 57, 74: 54, 
-  67: 47, 64: 60, 46: 25, 44: 23, 42: 21, 
-  36: 13, 32: 10
-};
-
-const ladders = {
-  4: 14, 9: 31, 12: 48, 17: 37, 20: 39, 
-  28: 84, 33: 53, 41: 61, 45: 65, 54: 74, 
-  62: 80, 71: 91
-};
-
-const safetyMsgs = {
-  1: "Safety Starts With Me", 10: "Incident Reporting", 15: "Safety Induction",
-  20: "Result in Multiple Injury", 25: "Back Arrester", 30: "Prevent Hand Servered",
-  40: "Protect Your Eyes", 50: "No Consumption of Alcohol", 60: "Material from Height",
-  70: "Damaged Equipment", 80: "Key to Your Safety", 90: "Avoid Fire & Explosions",
-  100: "Go Home Safely!"
-};
+const snakes = { 99:1, 97:79, 95:75, 93:73, 91:69, 87:24, 84:63, 82:61, 77:57, 74:54, 67:47, 64:60, 46:25, 44:23, 42:21, 36:13, 32:10 };
+const ladders = { 4:14, 9:31, 12:48, 17:37, 20:39, 28:84, 33:53, 41:61, 45:65, 54:74, 62:80, 71:91 };
+const safetyMsgs = { 1:"Safety Starts With Me", 10:"Incident Reporting", 15:"Safety Induction", 20:"Multiple Injury", 25:"Back Arrester", 30:"Prevent Hand Servered", 40:"Protect Eyes", 50:"No Alcohol", 60:"Material from Height", 70:"Damaged Equip", 80:"Key to Safety", 90:"Avoid Fire", 100:"Go Home Safely!" };
 
 function createBoard() {
   grid.innerHTML = '';
@@ -43,153 +25,122 @@ function createBoard() {
       for (let n = base + 1; n <= base + 10; n++) addCell(n);
     }
   }
+  renderTokens();
 }
 
 function addCell(num) {
   const cell = document.createElement('div');
   cell.className = 'cell';
   cell.id = `cell-${num}`;
-  let content = num;
-  if (snakes[num]) content += `<br>🐍`;
-  if (ladders[num]) content += `<br>🪜`;
-  if (safetyMsgs[num]) content += `<br><small>${safetyMsgs[num]}</small>`;
-  cell.innerHTML = content;
+  cell.innerHTML = `
+    <div class="cell-num">${num}</div>
+    ${snakes[num] ? '<div class="cell-icon">🐍</div>' : ''}
+    ${ladders[num] ? '<div class="cell-icon">🪜</div>' : ''}
+    ${safetyMsgs[num] ? `<div class="cell-msg">${safetyMsgs[num]}</div>` : ''}
+  `;
   grid.appendChild(cell);
 }
 
-function animateDice(roll, callback) {
+function renderTokens() {
+  document.querySelectorAll('.cell').forEach(c => {
+    const n = parseInt(c.id.split('-')[1]);
+    c.style.boxShadow = 'none';
+    c.style.background = n % 2 === 0 ? '#3d566e' : '#2c3e50';
+  });
+  const pCell = document.getElementById(`cell-${pPos}`);
+  const aCell = document.getElementById(`cell-${aiPos}`);
+  if(pCell) { pCell.style.boxShadow = 'inset 0 0 0 3px #27ae60'; pCell.style.background = '#1e3a2f'; }
+  if(aCell) { aCell.style.boxShadow = 'inset 0 0 0 3px #e74c3c'; aCell.style.background = '#3a1e1e'; }
+}
+
+function animateDice(callback) {
   diceEl.classList.add('rolling');
   diceValueEl.textContent = 'Rolling...';
-  
-  // Rapidly cycle through dice faces for animation effect
   const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-  let cycleCount = 0;
-  const maxCycles = 15 + Math.random() * 10; // Random duration for realism
-  
-  const cycle = setInterval(() => {
+  let count = 0;
+  const interval = setInterval(() => {
     diceEl.textContent = faces[Math.floor(Math.random() * 6)];
-    cycleCount++;
-    if (cycleCount >= maxCycles) {
-      clearInterval(cycle);
+    count++;
+    if (count > 12) {
+      clearInterval(interval);
       diceEl.classList.remove('rolling');
-      diceEl.classList.add('stopped');
+      const roll = Math.floor(Math.random() * 6) + 1;
       diceEl.textContent = faces[roll - 1];
       diceValueEl.textContent = `Rolled: ${roll}`;
-      
-      // Remove stopped class after animation
-      setTimeout(() => diceEl.classList.remove('stopped'), 500);
-      callback();
+      callback(roll);
     }
   }, 80);
 }
 
-function rollDice(isAuto = true) {
+function processMove(pos, roll, isPlayer) {
+  let next = pos + roll;
+  if (next > 100) next = pos;
+  let msg = '';
+  
+  if (snakes[next]) {
+    msg = `🐍 Snake! Slid to ${snakes[next]}. ${safetyMsgs[snakes[next]]||''}`;
+    next = snakes[next];
+  } else if (ladders[next]) {
+    msg = `🪜 Ladder! Climbed to ${ladders[next]}. ${safetyMsgs[ladders[next]]||''}`;
+    next = ladders[next];
+  } else if (safetyMsgs[next]) {
+    msg = safetyMsgs[next];
+  }
+  
+  if (isPlayer) pPos = next; else aiPos = next;
+  
+  renderTokens();
+  updateStatus();
+  if (msg) msgEl.textContent = msg;
+  
+  if (next === 100) {
+    gameActive = false;
+    rollBtn.disabled = true;
+    msgEl.textContent = isPlayer ? "🎉 YOU WIN! Safety Champion!" : "🤖 AI WINS! Better luck next time.";
+    msgEl.style.color = isPlayer ? '#27ae60' : '#e74c3c';
+    return true;
+  }
+  return false;
+}
+
+function updateStatus() {
+  statusEl.textContent = isPlayerTurn ? "🟢 Your Turn" : "🔴 AI's Turn";
+  rollBtn.disabled = !isPlayerTurn || !gameActive;
+  statusEl.textContent += ` | You: ${pPos} | AI: ${aiPos}`;
+}
+
+function playerRoll() {
   if (!gameActive || !isPlayerTurn) return;
+  rollBtn.disabled = true;
+  msgEl.textContent = "Rolling...";
   
-  isPlayerTurn = false; // Lock turn during animation
-  const roll = Math.floor(Math.random() * 6) + 1;
-  
-  animateDice(roll, () => {
-    setTimeout(() => {
-      pPos = move(pPos, roll);
-      updateUI();
-      
-      if (pPos === 100) {
-        msgEl.textContent = "🎉 YOU WIN! Safety Champion!";
-        endGame();
-        return;
-      }
-      
-      // AI turn after delay
-      setTimeout(aiTurn, 1500);
-    }, 300);
+  animateDice((roll) => {
+    const ended = processMove(pPos, roll, true);
+    if (!ended) {
+      isPlayerTurn = false;
+      updateStatus();
+      setTimeout(aiTurn, 1200);
+    }
   });
 }
 
 function aiTurn() {
   if (!gameActive || isPlayerTurn) return;
+  msgEl.textContent = "🤖 AI is rolling...";
   
-  const roll = Math.floor(Math.random() * 6) + 1;
-  
-  animateDice(roll, () => {
-    setTimeout(() => {
-      aiPos = move(aiPos, roll);
-      updateUI();
-      
-      if (aiPos === 100) {
-        msgEl.textContent = "🤖 AI WINS! Safety is serious!";
-        endGame();
-        return;
-      }
-      
+  animateDice((roll) => {
+    const ended = processMove(aiPos, roll, false);
+    if (!ended) {
       isPlayerTurn = true;
-      // Schedule next auto-roll
-      if (gameActive) {
-        msgEl.textContent = "Your turn... Auto-roll in 2s";
-        setTimeout(() => { if (gameActive && isPlayerTurn) rollDice(); }, 2000);
-      }
-    }, 300);
+      updateStatus();
+      msgEl.textContent = "Your turn! Roll the dice.";
+    }
   });
 }
 
-function move(pos, roll) {
-  let next = pos + roll;
-  if (next > 100) next = pos;
-  
-  if (snakes[next]) {
-    msgEl.textContent = `🐍 Snake! Slid to ${snakes[next]}. ${safetyMsgs[snakes[next]]||''}`;
-    next = snakes[next];
-  } else if (ladders[next]) {
-    msgEl.textContent = `🪜 Ladder! Climbed to ${ladders[next]}. ${safetyMsgs[ladders[next]]||''}`;
-    next = ladders[next];
-  } else if (safetyMsgs[next]) {
-    msgEl.textContent = safetyMsgs[next];
-  }
-  
-  return next;
-}
-
-function updateUI() {
-  statusEl.textContent = `You: ${pPos} | AI: ${aiPos}`;
-  document.querySelectorAll('.cell').forEach(c => c.style.background = '');
-  const pCell = document.getElementById(`cell-${pPos}`);
-  const aCell = document.getElementById(`cell-${aiPos}`);
-  if(pCell) pCell.style.background = 'rgba(39,174,96,0.3)';
-  if(aCell) aCell.style.background = 'rgba(231,76,60,0.3)';
-}
-
-function endGame() {
-  gameActive = false;
-  if (autoRollInterval) clearInterval(autoRollInterval);
-  rollBtn.style.display = 'inline-block';
-  rollBtn.textContent = 'Play Again';
-  rollBtn.onclick = resetGame;
-}
-
-function resetGame() {
-  pPos = 1; aiPos = 1; isPlayerTurn = true; gameActive = true;
-  diceEl.textContent = '🎲';
-  diceValueEl.textContent = 'Rolling...';
-  msgEl.textContent = 'Game restarting...';
-  rollBtn.style.display = 'none';
-  updateUI();
-  createBoard();
-  // Start auto-rolls again
-  setTimeout(() => { if (gameActive) rollDice(); }, 1500);
-}
-
-// Manual override (optional)
-if (rollBtn) {
-  rollBtn.addEventListener('click', () => {
-    if (gameActive && isPlayerTurn) rollDice();
-    else if (!gameActive) resetGame();
-  });
-}
-
-// Start game automatically
+rollBtn.addEventListener('click', playerRoll);
 document.addEventListener('DOMContentLoaded', () => {
   createBoard();
-  updateUI();
-  // First auto-roll after 3 seconds
-  setTimeout(() => { if (gameActive) rollDice(); }, 3000);
+  updateStatus();
+  msgEl.textContent = "🎲 Click ROLL DICE to start!";
 });
