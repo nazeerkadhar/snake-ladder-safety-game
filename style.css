@@ -23,7 +23,7 @@ body {
   line-height: 1.5;
 }
 
-/* HEADER - Logo Left, Text Centered */
+/* HEADER - Logo Left, Title Stack Centered */
 header {
   background: var(--bg-header);
   padding: 15px 20px;
@@ -31,23 +31,51 @@ header {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 15px;
   flex-wrap: wrap;
 }
 
-header img {
-  height: 70px;
-  width: auto;
+.logo-left {
   flex-shrink: 0;
 }
 
-header h1 {
+.site-logo {
+  height: 70px;
+  width: auto;
+  display: block;
+}
+
+.title-stack {
+  flex: 1;
+  text-align: center;
+  min-width: 200px;
+}
+
+.title-stack h1 {
   font-size: 1.8rem;
   font-weight: 700;
   color: #fff;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
 }
 
+.title-stack h2 {
+  font-size: 1rem;
+  color: var(--accent);
+  font-style: italic;
+  margin: 0 0 4px 0;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.title-stack p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
 header h2 {
   font-size: 1rem;
   color: var(--accent);
