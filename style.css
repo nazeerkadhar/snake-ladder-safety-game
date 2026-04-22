@@ -1,0 +1,97 @@
+/* Nazeer Safety Solutions - Game Styles */
+:root {
+  --primary: #0056b3;
+  --accent: #ff9900;
+  --bg: #f4f7f6;
+  --board-bg: #ffffff;
+  --text: #333;
+  --snake: #d9534f;
+  --ladder: #5cb85c;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: var(--text);
+}
+
+header {
+  background: linear-gradient(135deg, var(--primary), #002a5c);
+  color: white;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+header h1 { margin: 0; font-size: 2.5rem; }
+header h2 { margin: 10px 0 0; font-size: 1.2rem; color: #ffd700; font-weight: 300; }
+header p { margin: 10px 0 0; font-size: 0.9rem; opacity: 0.8; }
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Game Board Grid */
+#board {
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  grid-template-rows: repeat(10, 50px);
+  border: 2px solid var(--primary);
+  background: var(--board-bg);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.cell {
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  position: relative;
+  background: #fafafa;
+}
+
+.cell:nth-child(odd) { background: #eef4ff; }
+
+/* Controls */
+#controls {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 400px;
+}
+
+#roll {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+#roll:active { transform: scale(0.95); }
+
+#status { font-weight: bold; margin: 15px 0; }
+#message { color: var(--primary); min-height: 20px; }
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  #board {
+    grid-template-columns: repeat(10, 32px);
+    grid-template-rows: repeat(10, 32px);
+  }
+  header h1 { font-size: 1.8rem; }
+  .cell { font-size: 8px; }
+}
