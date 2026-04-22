@@ -21,16 +21,20 @@
   </div>
 </header>
   <main>
-        <div id="controls">
-      <!-- Animated Dice Display -->
+            <div id="controls">
       <div class="dice-wrapper">
         <div id="dice" class="dice-animate">🎲</div>
-        <div id="dice-value" class="dice-value">Rolling...</div>
+        <div id="dice-value" class="dice-value">Click to Roll</div>
       </div>
       
-      <p id="status">You: 1 | AI: 1</p>
-      <p id="message">Game starting... Auto-roll in 3s</p>
+      <div class="status-bar">
+        <span id="status">🟢 Your Turn | You: 1 | AI: 1</span>
+      </div>
       
+      <button id="roll-btn" class="roll-btn">🎲 ROLL DICE</button>
+      
+      <p id="message">Welcome! Roll to start your safety journey.</p>
+    </div>
       <!-- Manual override button (hidden by default) -->
       <button id="roll-manual" class="roll-manual" style="display:none
   </main>
