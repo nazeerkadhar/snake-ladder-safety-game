@@ -1,155 +1,53 @@
-const snakes = {99:1,97:79,95:75,93:73,91:69,87:24,84:63,82:61,77:57,74:54,67:47,64:60,46:25,44:23,42:21,36:13,32:10};
-const ladders = {4:14,9:31,12:48,17:37,20:39,28:84,33:53,41:61,45:65,54:74,62:80,71:91};
-const safetyMsgs = {1:"Safety Starts With Me",10:"Incident Reporting",15:"Safety Induction",20:"Multiple Injury",25:"Back Arrester",30:"Prevent Hand Servered",40:"Protect Eyes",50:"No Alcohol",60:"Material from Height",70:"Damaged Equip",80:"Key to Safety",90:"Avoid Fire",100:"Go Home Safely!"};
+const snakes={99:1,97:79,95:75,93:73,91:69,87:24,84:63,82:61,77:57,74:54,67:47,64:60,46:25,44:23,42:21,36:13,32:10};
+const ladders={4:14,9:31,12:48,17:37,20:39,28:84,33:53,41:61,45:65,54:74,62:80,71:91};
+const msg={1:"Safety Starts With Me",10:"Incident Reporting",15:"Safety Induction",20:"Multiple Injury",25:"Back Arrester",30:"Prevent Hand Servered",40:"Protect Eyes",50:"No Alcohol",60:"Material from Height",70:"Damaged Equip",80:"Key to Safety",90:"Avoid Fire",100:"Go Home Safely!"};
 
-let pPos=1, aiPos=1, isPlayerTurn=true, gameActive=true;
-
-const grid=document.getElementById('board');
-const diceEl=document.getElementById('dice');
-const diceValEl=document.getElementById('dice-value');
-const statusEl=document.getElementById('status');
-const msgEl=document.getElementById('message');
-const rollBtn=document.getElementById('roll-btn');
+let p=1,a=1,turn=true,active=true;
+const g=document.getElementById('board'),d=document.getElementById('dice'),dv=document.getElementById('dice-value'),s=document.getElementById('status'),m=document.getElementById('message'),b=document.getElementById('roll-btn');
 
 function init(){
-  createBoard();
-  renderTokens();
-  updateStatus();
-  msgEl.textContent="Click Roll to start";
-  // Re-add listener safely
-  const newBtn = rollBtn.cloneNode(true);
-  rollBtn.parentNode.replaceChild(newBtn, rollBtn);
-  document.getElementById('roll-btn').addEventListener('click', playerTurn);
+  if(!g||!b)return;
+  g.innerHTML='';
+  for(let r=0;r<10;r++){let base=(9-r)*10;for(let i=0;i<10;i++){let n=r%2===0?base+(10-i):base+(1+i);let c=document.createElement('div');c.className='cell';c.id='c'+n;c.innerHTML=`<div class="num">${n}</div>${snakes[n]?'<div class="icon">🐍</div>':ladders[n]?'<div class="icon">🪜</div>':'<div class="icon"> </div>'}${msg[n]?`<div class="msg">${msg[n]}</div>`:''}`;g.appendChild(c);}}
+  render();upd();m.textContent="Click ROLL to start";
+  b.replaceWith(b.cloneNode(true));document.getElementById('roll-btn').onclick=play;
 }
 
-function createBoard(){
-  grid.innerHTML='';
-  for(let r=0;r<10;r++){
-    let base=(9-r)*10;
-    for(let i=0;i<10;i++){
-      let n=(r%2===0)?base+(10-i):base+(1+i);
-      const c=document.createElement('div');
-      c.className='cell';
-      c.id=`cell-${n}`;
-      let html=`<div class="num">${n}</div>`;
-      if(snakes[n]) html+=`<div class="icon">🐍</div>`;
-      else if(ladders[n]) html+=`<div class="icon">🪜</div>`;
-      else html+=`<div class="icon"> </div>`;
-      if(safetyMsgs[n]) html+=`<div class="msg">${safetyMsgs[n]}</div>`;
-      c.innerHTML=html;
-      grid.appendChild(c);
-    }
-  }
+function render(){
+  document.querySelectorAll('.cell').forEach(c=>{c.style.border='1px solid #34495e';c.style.background=parseInt(c.id.slice(1))%2?'#2c3e50':'#3d566e';});
+  let pc=document.getElementById('c'+p),ac=document.getElementById('c'+a);
+  if(pc){pc.style.border='2px solid #27ae60';pc.style.background='#1e3a2f';}
+  if(ac){ac.style.border='2px solid #e74c3c';ac.style.background='#3a1e1e';}
 }
 
-function renderTokens(){
-  document.querySelectorAll('.cell').forEach(c=>{
-    c.style.border='1px solid #34495e';
-    c.style.background=parseInt(c.id.split('-')[1])%2!==0?'#2c3e50':'#3d566e';
-  });
-  const p=document.getElementById(`cell-${pPos}`);
-  if(p){p.style.border='2px solid #27ae60';p.style.background='#1e3a2f';}
-  const a=document.getElementById(`cell-${aiPos}`);
-  if(a){a.style.border='2px solid #e74c3c';a.style.background='#3a1e1e';}
+function upd(){
+  if(!active){s.textContent="Game Over";b.textContent="Play Again";b.disabled=false;b.onclick=()=>{p=1;a=1;turn=true;active=true;init();};return;}
+  s.textContent=turn?`🟢 Your Turn | You:${p} AI:${a}`:`🔴 AI Turn | You:${p} AI:${a}`;
+  b.disabled=!turn;
 }
 
-function updateStatus(){
-  if(!gameActive){
-    statusEl.textContent="Game Over";
-    rollBtn.textContent="Play Again";
-    rollBtn.disabled=false;
-    rollBtn.onclick=resetGame;
-  } else {
-    statusEl.textContent=isPlayerTurn?`🟢 Your Turn | You: ${pPos} | AI: ${aiPos}`:`🔴 AI Thinking... | You: ${pPos} | AI: ${aiPos}`;
-    rollBtn.disabled=!isPlayerTurn;
-  }
+function spin(cb){
+  d.style.animation='none';
+  let i=0,f=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  let iv=setInterval(()=>{d.textContent=f[Math.floor(Math.random()*6)];i++;if(i>10){clearInterval(iv);let r=Math.floor(Math.random()*6)+1;d.textContent=f[r-1];dv.textContent='Rolled: '+r;cb(r);}},80);
 }
 
-// --- SIMPLIFIED ANIMATION ---
-function animateDice(callback) {
-    const faces = ['⚀', '⚁', '⚂', '', '⚄', '⚅'];
-    let count = 0;
-    
-    function spin() {
-        // Show random face
-        diceEl.textContent = faces[Math.floor(Math.random() * 6)];
-        count++;
-        
-        // After 10 spins, STOP and give result
-        if (count < 10) {
-            setTimeout(spin, 80); // Wait 80ms then spin again
-        } else {
-            const finalRoll = Math.floor(Math.random() * 6) + 1;
-            diceEl.textContent = faces[finalRoll - 1]; // Show final face
-            diceValEl.textContent = `Rolled: ${finalRoll}`;
-            callback(finalRoll);
-        }
-    }
-    spin(); // Start spinning
+function move(pos,r,isP){
+  let n=pos+r;if(n>100)n=pos;
+  let ms='';
+  if(snakes[n]){ms=`🐍 Snake! → ${snakes[n]}`;n=snakes[n];}
+  else if(ladders[n]){ms=`🪜 Ladder! → ${ladders[n]}`;n=ladders[n];}
+  if(isP)p=n;else a=n;
+  render();if(ms)m.textContent=ms;
+  if(n===100){active=false;upd();m.textContent=isP?'🎉 YOU WIN!':'🤖 AI WINS!';m.style.color=isP?'#27ae60':'#e74c3c';return true;}
+  return false;
 }
 
-function playerTurn(){
-  if(!gameActive || !isPlayerTurn) return;
-  rollBtn.disabled = true;
-  msgEl.textContent = "Rolling...";
-  
-  animateDice((roll) => {
-    let next = pPos + roll;
-    if(next > 100) next = pPos;
-    
-    // Check Snakes/Ladders
-    if(snakes[next]) { msgEl.textContent = `🐍 Snake! Slid to ${snakes[next]}.`; next = snakes[next]; }
-    else if(ladders[next]) { msgEl.textContent = `🪜 Ladder! Up to ${ladders[next]}.`; next = ladders[next]; }
-    
-    pPos = next;
-    renderTokens();
-    
-    if(pPos === 100) { endGame(true); return; }
-    
-    // Switch to AI
-    isPlayerTurn = false;
-    updateStatus();
-    setTimeout(aiTurn, 1500);
+function play(){
+  if(!active||!turn)return;b.disabled=true;m.textContent='Rolling...';
+  spin(r=>{
+    if(!move(p,r,true)){turn=false;upd();setTimeout(()=>{if(!active)return;m.textContent='🤖 AI rolling...';spin(ar=>{if(!move(a,ar,false)){turn=true;upd();m.textContent='Your turn! Click ROLL.';}});},1200);}
   });
 }
 
-function aiTurn(){
-  if(!gameActive || isPlayerTurn) return;
-  msgEl.textContent = "🤖 AI is rolling...";
-  
-  animateDice((roll) => {
-    let next = aiPos + roll;
-    if(next > 100) next = aiPos;
-    
-    if(snakes[next]) { msgEl.textContent = `🐍 AI hit snake! Slid to ${snakes[next]}.`; next = snakes[next]; }
-    else if(ladders[next]) { msgEl.textContent = `🪜 AI climbed! Up to ${ladders[next]}.`; next = ladders[next]; }
-    
-    aiPos = next;
-    renderTokens();
-    
-    if(aiPos === 100) { endGame(false); return; }
-    
-    // Switch to Player
-    isPlayerTurn = true;
-    updateStatus();
-    msgEl.textContent = "Your turn! Click Roll.";
-  });
-}
-
-function endGame(win){
-  gameActive = false;
-  updateStatus();
-  msgEl.textContent = win ? "🎉 YOU WIN! Safety First!" : "🤖 AI Wins! Try again?";
-  msgEl.style.color = win ? "#27ae60" : "#e74c3c";
-}
-
-function resetGame(){
-  pPos=1; aiPos=1; isPlayerTurn=true; gameActive=true;
-  diceEl.textContent="🎲"; diceValEl.textContent="Ready";
-  msgEl.textContent="New game! Click Roll.";
-  msgEl.style.color="#bdc3c7";
-  rollBtn.onclick=null;
-  init();
-}
-
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded',init);
