@@ -6,11 +6,11 @@ let p=1,a=1,turn=true,active=true;
 const g=document.getElementById('board'),d=document.getElementById('dice'),dv=document.getElementById('dice-value'),s=document.getElementById('status'),m=document.getElementById('message'),b=document.getElementById('roll-btn');
 
 function init(){
-  if(!g||!b)return;
+  if(!g||!b) return console.error("Board or button missing");
   g.innerHTML='';
   for(let r=0;r<10;r++){let base=(9-r)*10;for(let i=0;i<10;i++){let n=r%2===0?base+(10-i):base+(1+i);let c=document.createElement('div');c.className='cell';c.id='c'+n;c.innerHTML=`<div class="num">${n}</div>${snakes[n]?'<div class="icon">🐍</div>':ladders[n]?'<div class="icon">🪜</div>':'<div class="icon"> </div>'}${msg[n]?`<div class="msg">${msg[n]}</div>`:''}`;g.appendChild(c);}}
   render();upd();m.textContent="Click ROLL to start";
-  b.replaceWith(b.cloneNode(true));document.getElementById('roll-btn').onclick=play;
+  console.log("Game initialized successfully");
 }
 
 function render(){
@@ -21,7 +21,7 @@ function render(){
 }
 
 function upd(){
-  if(!active){s.textContent="Game Over";b.textContent="Play Again";b.disabled=false;b.onclick=()=>{p=1;a=1;turn=true;active=true;init();};return;}
+  if(!active){s.textContent="Game Over";b.textContent="Play Again";b.disabled=false;b.onclick=resetGame;return;}
   s.textContent=turn?`🟢 Your Turn | You:${p} AI:${a}`:`🔴 AI Turn | You:${p} AI:${a}`;
   b.disabled=!turn;
 }
@@ -44,10 +44,32 @@ function move(pos,r,isP){
 }
 
 function play(){
-  if(!active||!turn)return;b.disabled=true;m.textContent='Rolling...';
+  if(!active||!turn)return;
+  b.disabled=true;m.textContent='Rolling...';
   spin(r=>{
-    if(!move(p,r,true)){turn=false;upd();setTimeout(()=>{if(!active)return;m.textContent='🤖 AI rolling...';spin(ar=>{if(!move(a,ar,false)){turn=true;upd();m.textContent='Your turn! Click ROLL.';}});},1200);}
+    if(!move(p,r,true)){
+      turn=false;upd();
+      setTimeout(()=>{
+        if(!active)return;
+        m.textContent='🤖 AI rolling...';
+        spin(ar=>{
+          if(!move(a,ar,false)){
+            turn=true;upd();
+            m.textContent='Your turn! Click ROLL.';
+          }
+        });
+      },1200);
+    }
   });
 }
 
-document.addEventListener('DOMContentLoaded',init);
+function resetGame(){
+  p=1;a=1;turn=true;active=true;
+  d.textContent='🎲';dv.textContent='Ready';
+  m.textContent='New game! Click ROLL.';m.style.color='#bdc3c7';
+  b.textContent='🎲 ROLL DICE';b.onclick=null;
+  b.addEventListener('click', play); // Reattach for manual clicks if needed
+  init();
+}
+
+document.addEventListener('DOMContentLoaded', init);
