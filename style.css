@@ -9,7 +9,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;g
 .cell .num{font-weight:bold;font-size:.8rem}.cell .icon{font-size:1rem;margin-top:2px}.cell .msg{font-size:.55rem;text-align:center;padding:0 2px;color:#bdc3c7;margin-top:2px}.cell.win{background:#f1c40f!important;color:#1a252f!important}
 #controls{background:var(--card);padding:20px;border-radius:12px;width:100%;max-width:420px;text-align:center;border:2px solid var(--brd)}
 #dice{font-size:3.5rem;margin-bottom:8px;user-select:none}#dice-value{font-weight:700;color:var(--acc);margin-bottom:12px}
-#roll-btn{background:var(--acc);color:#fff;border:none;padding:12px 28px;font-size:1rem;font-weight:700;border-radius:8px;cursor:pointer;width:100%}#roll-btn:disabled{opacity:.5;cursor:not-allowed}
+#roll-btn{background:var(--acc);color:#fff;border:none;padding:12px 28px;font-size:1rem;font-weight:700;border-radius:8px;cursor:pointer;width:100%;transition:transform .1s}#roll-btn:active{transform:scale(.98)}#roll-btn:disabled{opacity:.5;cursor:not-allowed}
 #status{margin:15px 0 10px;font-weight:600}#message{min-height:20px;color:#bdc3c7}
 footer{text-align:center;padding:20px;font-size:.85rem;opacity:.7}
 @media(max-width:600px){header{flex-direction:column;text-align:center}.site-logo{height:55px}.title-stack h1{font-size:1.5rem}}
