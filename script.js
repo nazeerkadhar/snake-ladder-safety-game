@@ -6,18 +6,39 @@ let p=1,a=1,turn=true,active=true;
 const g=document.getElementById('board'),d=document.getElementById('dice'),dv=document.getElementById('dice-value'),s=document.getElementById('status'),m=document.getElementById('message'),b=document.getElementById('roll-btn');
 
 function init(){
-  if(!g||!b) return console.error("Board or button missing");
+  if(!g||!b)return;
   g.innerHTML='';
-  for(let r=0;r<10;r++){let base=(9-r)*10;for(let i=0;i<10;i++){let n=r%2===0?base+(10-i):base+(1+i);let c=document.createElement('div');c.className='cell';c.id='c'+n;c.innerHTML=`<div class="num">${n}</div>${snakes[n]?'<div class="icon">🐍</div>':ladders[n]?'<div class="icon">🪜</div>':'<div class="icon"> </div>'}${msg[n]?`<div class="msg">${msg[n]}</div>`:''}`;g.appendChild(c);}}
+  for(let r=0;r<10;r++){
+    let base=(9-r)*10;
+    for(let i=0;i<10;i++){
+      let n=r%2===0?base+(10-i):base+(1+i);
+      let c=document.createElement('div');
+      c.className='cell';
+      c.id='c'+n;
+      
+      // Add 3D highlight classes
+      if(snakes[n]) c.classList.add('snake');
+      else if(ladders[n]) c.classList.add('ladder');
+      if(n===100) c.classList.add('win');
+      
+      c.innerHTML=`<div class="num">${n}</div>
+        <div class="icon">${snakes[n]?'🐍':ladders[n]?'🪜':''}</div>
+        ${msg[n]?`<div class="msg">${msg[n]}</div>`:''}`;
+      g.appendChild(c);
+    }
+  }
   render();upd();m.textContent="Click ROLL to start";
-  console.log("Game initialized successfully");
+  console.log("3D Board Initialized");
 }
 
 function render(){
-  document.querySelectorAll('.cell').forEach(c=>{c.style.border='1px solid #34495e';c.style.background=parseInt(c.id.slice(1))%2?'#2c3e50':'#3d566e';});
+  document.querySelectorAll('.cell').forEach(c=>{
+    c.style.border=c.classList.contains('win')?'2px solid #fff':c.classList.contains('snake')?'2px solid #ef4444':c.classList.contains('ladder')?'2px solid #22c55e':'1px solid rgba(255,255,255,0.08)';
+  });
   let pc=document.getElementById('c'+p),ac=document.getElementById('c'+a);
-  if(pc){pc.style.border='2px solid #27ae60';pc.style.background='#1e3a2f';}
-  if(ac){ac.style.border='2px solid #e74c3c';ac.style.background='#3a1e1e';}
+  document.querySelectorAll('.cell').forEach(c=>c.style.boxShadow='');
+  if(pc){pc.style.boxShadow='0 0 0 3px #22c55e, 0 0 12px rgba(34,197,94,0.6)';pc.style.zIndex='30';}
+  if(ac){ac.style.boxShadow='0 0 0 3px #ef4444, 0 0 12px rgba(239,68,68,0.6)';ac.style.zIndex='30';}
 }
 
 function upd(){
@@ -28,7 +49,7 @@ function upd(){
 
 function spin(cb){
   d.style.animation='none';
-  let i=0,f=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  let i=0,f=['⚀','','⚂','','⚄',''];
   let iv=setInterval(()=>{d.textContent=f[Math.floor(Math.random()*6)];i++;if(i>10){clearInterval(iv);let r=Math.floor(Math.random()*6)+1;d.textContent=f[r-1];dv.textContent='Rolled: '+r;cb(r);}},80);
 }
 
@@ -39,7 +60,7 @@ function move(pos,r,isP){
   else if(ladders[n]){ms=`🪜 Ladder! → ${ladders[n]}`;n=ladders[n];}
   if(isP)p=n;else a=n;
   render();if(ms)m.textContent=ms;
-  if(n===100){active=false;upd();m.textContent=isP?'🎉 YOU WIN!':'🤖 AI WINS!';m.style.color=isP?'#27ae60':'#e74c3c';return true;}
+  if(n===100){active=false;upd();m.textContent=isP?'🎉 YOU WIN! Safety First!':'🤖 AI Wins! Try again?';m.style.color=isP?'#22c55e':'#ef4444';return true;}
   return false;
 }
 
@@ -66,9 +87,9 @@ function play(){
 function resetGame(){
   p=1;a=1;turn=true;active=true;
   d.textContent='🎲';dv.textContent='Ready';
-  m.textContent='New game! Click ROLL.';m.style.color='#bdc3c7';
+  m.textContent='New game! Click ROLL.';m.style.color='#94a3b8';
   b.textContent='🎲 ROLL DICE';b.onclick=null;
-  b.addEventListener('click', play); // Reattach for manual clicks if needed
+  b.addEventListener('click', play);
   init();
 }
 
