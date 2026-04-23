@@ -4,27 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Snake & Ladder Game | Nazeer Safety Solutions</title>
-  <link rel="stylesheet" href="style.css?v=11" />
+  <link rel="stylesheet" href="style.css?v=12" />
 </head>
 <body>
+  <!-- Header is now compact -->
   <header>
     <div class="logo-left">
       <img src="logo.png" alt="Nazeer Safety Solutions" class="site-logo">
     </div>
     <div class="title-stack">
-      <h1>Snake & Ladder Game</h1>
-      <h2>Causes & Consequences of Safety and Accidents</h2>
-      <p>Created by Nazeer Safety Solutions, Dubai, UAE</p>
+      <h1>Snake & Ladder</h1>
+      <h2>Causes & Consequences</h2>
+      <p>Nazeer Safety Solutions, Dubai</p>
     </div>
   </header>
 
+  <!-- Main area allows board to shrink if needed -->
   <main>
-    <div id="board"></div>
+    <div class="board-container">
+      <div id="board"></div>
+    </div>
     
     <div id="controls">
-      <div id="dice" class="dice-display">🎲</div>
+      <div id="dice">🎲</div>
       <div id="dice-value">Ready</div>
-      <!-- FIXED: Added onclick directly to guarantee click works -->
       <button id="roll-btn" onclick="play()">🎲 ROLL DICE</button>
       <div id="status">🟢 Your Turn | You: 1 | AI: 1</div>
       <div id="message">Click ROLL to start</div>
@@ -32,9 +35,9 @@
   </main>
 
   <footer>
-    <p>© 2026 Snake & Ladder Game - Nazeer Safety Solutions, Dubai, UAE</p>
+    <p>© 2026 Nazeer Safety Solutions</p>
   </footer>
 
-  <script src="script.js?v=11"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>
