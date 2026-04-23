@@ -1,44 +1,40 @@
-  <link rel="stylesheet" href="style.css?v=10" /><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Snake & Ladder Game | Nazeer Safety Solutions</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=11" />
 </head>
 <body>
-<header>
-  <!-- Logo Left -->
-  <div class="logo-left">
-    <img src="logo.png" alt="Nazeer Safety Solutions Logo" class="site-logo">
-  </div>
-  
-  <!-- Centered Title Stack -->
-  <div class="title-stack">
-    <h1>Snake & Ladder Game</h1>
-    <h2>Causes & Consequences of Safety and Accidents</h2>
-    <p>Created by Nazeer Safety Solutions, Dubai, UAE</p>
-  </div>
-</header>
-  <main>
-            <div id="controls">
-      <div class="dice-wrapper">
-        <div id="dice" class="dice-animate">🎲</div>
-        <div id="dice-value" class="dice-value">Click to Roll</div>
-      </div>
-      
-      <div class="status-bar">
-        <span id="status">🟢 Your Turn | You: 1 | AI: 1</span>
-      </div>
-      
-      <button id="roll-btn" class="roll-btn">🎲 ROLL DICE</button>
-      
-      <p id="message">Welcome! Roll to start your safety journey.</p>
+  <header>
+    <div class="logo-left">
+      <img src="logo.png" alt="Nazeer Safety Solutions" class="site-logo">
     </div>
-      <!-- Manual override button (hidden by default) -->
-      <button id="roll-manual" class="roll-manual" style="display:none
+    <div class="title-stack">
+      <h1>Snake & Ladder Game</h1>
+      <h2>Causes & Consequences of Safety and Accidents</h2>
+      <p>Created by Nazeer Safety Solutions, Dubai, UAE</p>
+    </div>
+  </header>
+
+  <main>
+    <div id="board"></div>
+    
+    <div id="controls">
+      <div id="dice" class="dice-display">🎲</div>
+      <div id="dice-value">Ready</div>
+      <!-- FIXED: Added onclick directly to guarantee click works -->
+      <button id="roll-btn" onclick="play()">🎲 ROLL DICE</button>
+      <div id="status">🟢 Your Turn | You: 1 | AI: 1</div>
+      <div id="message">Click ROLL to start</div>
+    </div>
   </main>
-  <script src="script.js?v=2"></script>
+
+  <footer>
+    <p>© 2026 Snake & Ladder Game - Nazeer Safety Solutions, Dubai, UAE</p>
+  </footer>
+
+  <script src="script.js?v=11"></script>
 </body>
 </html>
-  <script src="script.js?v=10"></script>
